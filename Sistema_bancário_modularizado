@@ -1,0 +1,138 @@
+# Constante para o número da agência
+AGENCIA = "0001"
+
+# Função para mostrar o menu
+def mostrar_menu():
+    menu = """
+    [d] Depositar
+    [s] Sacar
+    [e] Extrato
+    [q] Sair
+    [c] Cadastrar Usuário
+    [n] Criar Conta
+    """
+    return input(menu)
+
+
+# Função para realizar depósito
+def depositar(saldo, extrato):
+    print("Depósito")
+    valor_deposito = float(input("Informe o valor do depósito: "))
+    saldo += valor_deposito
+    extrato += f"Depósito: R$ {valor_deposito:.2f}\n"
+    print("Depósito realizado com sucesso!")
+    return saldo, extrato
+
+
+# Função para realizar saque
+def sacar(saldo, extrato, numero_saques, limite_saques):
+    if numero_saques >= limite_saques:
+        print("Limite diário de saques excedido.\n")
+        return saldo, extrato, numero_saques
+
+    print("Saque")
+    valor_do_saque = float(input("Informe o valor do saque: "))
+
+    if valor_do_saque > 500:
+        print("Limite de R$500,00 por saque excedido.\n")
+    elif valor_do_saque <= 0:
+        print("Valor inválido para saque. Digite um valor maior que zero.\n")
+    elif valor_do_saque > saldo:
+        print("Erro: Você não tem saldo suficiente para este saque.\n")
+    else:
+        saldo -= valor_do_saque
+        numero_saques += 1
+        extrato += f"Saque: R$ {valor_do_saque:.2f}\n"
+        print(f"Saque de R$ {valor_do_saque:.2f} realizado com sucesso.")
+        print(f"Saldo restante: R$ {saldo:.2f}")
+
+    return saldo, extrato, numero_saques
+
+
+# Função para mostrar extrato
+def mostrar_extrato(saldo, extrato):
+    print("Extrato")
+    print(extrato)
+    print(f"Saldo atual: R$ {saldo:.2f}")
+
+
+# Função para cadastrar um novo usuário
+def cadastro_usuario(usuarios):
+    print("Cadastro de Usuário")
+    nome = input("Nome: ")
+    cpf = input("CPF: ")
+
+    # Verifica se o CPF já está cadastrado
+    for usuario in usuarios:
+        if usuario["cpf"] == cpf:
+            print("Erro: Este CPF já está cadastrado.")
+            return
+
+    # Adiciona o usuário com número de conta sequencial
+    numero_conta = len(usuarios) + 1
+    usuarios.append({"nome": nome, "cpf": cpf, "agencia": AGENCIA, "numero_conta": numero_conta})
+    print(f"Usuário cadastrado com sucesso! Conta {AGENCIA} - {numero_conta}")
+
+
+# Função para criar uma nova conta vinculada a um usuário
+def criar_conta(usuarios, contas):
+    print("Criar Conta")
+    cpf = input("Informe o CPF do usuário para criar a conta: ")
+
+    # Verifica se o CPF está cadastrado
+    for usuario in usuarios:
+        if usuario["cpf"] == cpf:
+            # Verifica se já existe conta para este usuário
+            if any(conta["cpf"] == cpf for conta in contas):
+                print("Erro: Este usuário já possui uma conta.")
+                return
+
+            # Cria a conta para o usuário
+            numero_conta = len(contas) + 1
+            contas.append({"cpf": cpf, "agencia": AGENCIA, "numero_conta": numero_conta})
+            print(f"Conta criada para o usuário {usuario['nome']} - {AGENCIA} - {numero_conta}")
+            return
+
+    print("CPF não encontrado. Cadastre o usuário primeiro.")
+
+
+# Função principal do programa
+def main():
+    saldo = 0
+    extrato = ""
+    numero_saques = 0
+    LIMITE_SAQUES = 3
+    usuarios = []
+    contas = []
+
+    while True:
+        opcao = mostrar_menu()
+
+        if opcao == "d":
+            saldo, extrato = depositar(saldo, extrato)
+
+        elif opcao == "s":
+            saldo, extrato, numero_saques = sacar(saldo, extrato, numero_saques, LIMITE_SAQUES)
+            if numero_saques >= LIMITE_SAQUES:
+                print("Número máximo de saques diários atingido.")
+                break  # Sai do loop quando o limite diário de saques for atingido
+
+        elif opcao == "e":
+            mostrar_extrato(saldo, extrato)
+
+        elif opcao == "c":
+            cadastro_usuario(usuarios)
+
+        elif opcao == "n":
+            criar_conta(usuarios, contas)
+
+        elif opcao == "q":
+            print("Sair")
+            break
+
+        else:
+            print("Operação inválida. Por favor, selecione novamente.\n")
+
+
+if __name__ == "__main__":
+    main()
